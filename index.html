@@ -1,0 +1,110 @@
+<!doctype html>
+<html lang="bn">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>toppannel — Random BD Numbers</title>
+  <style>
+    :root{--bg:#0f172a;--card:#0b1220;--accent:#06b6d4;--muted:#94a3b8}
+    *{box-sizing:border-box}
+    body{font-family:Inter, 'Segoe UI', Roboto, sans-serif;margin:0;background:linear-gradient(180deg,#07142a 0%, #071a2e 100%);color:#e6eef8}
+    header{background:linear-gradient(90deg,var(--accent),#7c3aed);padding:18px 24px;display:flex;align-items:center;justify-content:space-between}
+    .brand{font-weight:700;font-size:20px;letter-spacing:1px}
+    .container{max-width:980px;margin:28px auto;padding:18px}
+    .card{background:rgba(255,255,255,0.03);padding:16px;border-radius:12px;box-shadow:0 6px 18px rgba(2,6,23,0.6)}
+    .controls{display:flex;gap:12px;align-items:center}
+    .btn{background:var(--accent);color:#051025;border:none;padding:10px 14px;border-radius:10px;font-weight:600;cursor:pointer}
+    .btn.ghost{background:transparent;border:1px solid rgba(255,255,255,0.06);color:var(--muted)}
+    .numbers{margin-top:14px;display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:8px}
+    .num{padding:10px;border-radius:8px;background:linear-gradient(180deg,rgba(255,255,255,0.02),transparent);font-family:monospace}
+    .footer{margin-top:10px;color:var(--muted);font-size:13px}
+    @media (max-width:520px){.controls{flex-direction:column;align-items:stretch}}
+  </style>
+</head>
+<body>
+  <header>
+    <div class="brand">toppannel</div>
+    <div style="font-size:14px;opacity:.95">1000 Random Bangladeshi Numbers</div>
+  </header>
+
+  <main class="container">
+    <div class="card">
+      <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap">
+        <div class="controls">
+          <button id="gotoOtp" class="btn">recive otp</button>
+          <button id="copyAll" class="btn ghost">Copy all numbers</button>
+          <button id="regen" class="btn ghost">Regenerate (unique)</button>
+        </div>
+        <div style="font-size:13px;color:var(--muted)">প্রথম নম্বর: <strong>01625738422</strong></div>
+      </div>
+
+      <div class="numbers" id="numbers"></div>
+      <div class="footer">মোট: <span id="count">0</span> নম্বর (প্রথমটি নির্দিষ্ট)।</div>
+    </div>
+  </main>
+
+  <script>
+    const FIRST_NUMBER = '01625738422';
+    const TARGET_TOTAL = 1000;
+    const OUT_LINK = 'https://arx9558.github.io/OTP2/';
+
+    function randDigits(n){
+      let s='';
+      for(let i=0;i<n;i++) s += Math.floor(Math.random()*10);
+      return s;
+    }
+
+    function makeRandomBDNumber(){
+      // Bangladesh mobile numbers: starts with 01 + third digit 3-9, total 11 digits
+      const third = ['3','4','5','6','7','8','9'][Math.floor(Math.random()*7)];
+      // remaining 8 digits
+      const rest = randDigits(8);
+      return '01' + third + rest;
+    }
+
+    function generateNumbers(){
+      const set = new Set();
+      set.add(FIRST_NUMBER);
+      while(set.size < TARGET_TOTAL){
+        const n = makeRandomBDNumber();
+        if(!set.has(n)) set.add(n);
+      }
+      return Array.from(set);
+    }
+
+    function renderList(list){
+      const container = document.getElementById('numbers');
+      container.innerHTML = '';
+      list.forEach((num, idx)=>{
+        const el = document.createElement('div');
+        el.className = 'num';
+        el.textContent = (idx+1) + '. ' + num;
+        container.appendChild(el);
+      });
+      document.getElementById('count').textContent = list.length;
+    }
+
+    let currentList = generateNumbers();
+    renderList(currentList);
+
+    document.getElementById('gotoOtp').addEventListener('click', ()=>{
+      // open in new tab
+      window.open(OUT_LINK, '_blank');
+    });
+
+    document.getElementById('copyAll').addEventListener('click', async ()=>{
+      try{
+        await navigator.clipboard.writeText(currentList.join('\n'));
+        alert('সমস্ত নম্বর কপি করা হয়েছে — clipboard এ!');
+      }catch(e){
+        alert('কপি করা যায়নি। ব্রাউজার clipboard অনুমতি লাগতে পারে।');
+      }
+    });
+
+    document.getElementById('regen').addEventListener('click', ()=>{
+      currentList = generateNumbers();
+      renderList(currentList);
+    });
+  </script>
+</body>
+</html>
